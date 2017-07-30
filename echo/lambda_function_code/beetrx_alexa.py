@@ -2,6 +2,7 @@
 BeeTRx
 """
 
+
 def lambda_handler(event, context):
     """ Route the incoming request based on type (LaunchRequest, IntentRequest,
     etc.) The JSON body of the request is provided in the event parameter.
@@ -57,9 +58,13 @@ def on_intent(intent_request, session):
 
     # Dispatch to your skill's intent handlers
     if intent_name == "MedicineIntent":
-        return get_medicine_response()
-	if intent_name == "HoneyIntent":
-		return get_honey_response()
+        return get_medicine_response(intent_request)
+    elif intent_name == "HoneyIntent":
+        return get_honey_response(intent_request)
+    elif intent_name == "AMAZON.HelpIntent":
+        return get_help_response()
+    elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
+        return handle_session_end_request()
     else:
         raise ValueError("Invalid intent")
 
@@ -96,31 +101,33 @@ def get_help_response():
 
     reprompt_text = speech_output
     should_end_session = False
-    return build_response(session_attributes, build_speechlet_response(card_title,speech_output,reprompt_text,should_end_session))
+    return build_response(session_attributes, build_speechlet_response(card_title, speech_output, reprompt_text, should_end_session))
 
 
-def get_medicine_response():
+def get_medicine_response(intent_request):
     session_attributes = {}
     card_title = "Medicine"
     speech_template = "I understand you took {}. How many ounces of honey did you take?"
-	medicine = intent_request["intent"]["slots"]["Medicine"]["value"]
-	speech_output = speech_tempalte.format(medicine)
+    
+    medicine = intent_request["intent"]["slots"]["medicine"]["value"]
+    
+    speech_output = speech_template.format(medicine)
+    
     reprompt_text = speech_output
     should_end_session = True
-    return build_response(session_attributes, build_speechlet_response(card_title,speech_output,reprompt_text,should_end_session))
+    return build_response(session_attributes, build_speechlet_response(card_title, speech_output, reprompt_text, should_end_session))
 # Maybe not "should_end_session"
 
 
-def get_honey_response():
+def get_honey_response(intent_request):
     session_attributes = {}
     card_title = "Honey"
     speech_template = "I understand you took {} ounces of honey. How are you feeling?"
-	ounces = intent_request["intent"]["slots"]["Honey"]["value"]
-	speech_output = speec_template.format(ounces)
+    ounces = intent_request["intent"]["slots"]["number"]["value"]
+    speech_output = speech_template.format(ounces)
     reprompt_text = speech_output
     should_end_session = True
-    return build_response(session_attributes, build_speechlet_response(card_title,speech_output,reprompt_text,should_end_session))
-
+    return build_response(session_attributes, build_speechlet_response(card_title, speech_output, reprompt_text, should_end_session))
 
 
 def handle_session_end_request():
