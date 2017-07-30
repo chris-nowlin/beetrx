@@ -2,6 +2,29 @@
 BeeTRx
 """
 
+import requests
+
+to_send = {"string": "HELLO!"}
+url = "https://6737f637.ngrok.io/aws-test"
+
+
+def parse_response(intent_request, session):
+    """
+    Extracts relevant data from parsed response
+    {userId, sessionId, timestamp, type, value}
+
+    """
+    result = {}
+    result["userId"] = session["user"]["userId"]
+    result["sessionId"] = session["sessionId"]
+    result["timestamp"] = intent_request["timestamp"]
+    slots = intent_request["intent"]["slots"]
+    for key in slots:  # Expecting exactly one
+        result["type"] = slots[key]["name"]
+        result["value"] = slots[key]["value"]
+
+    return result
+
 
 def lambda_handler(event, context):
     """ Route the incoming request based on type (LaunchRequest, IntentRequest,
@@ -55,12 +78,20 @@ def on_intent(intent_request, session):
 
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
-
+        data = parse_response(intent_request, session)
     # Dispatch to your skill's intent handlers
     if intent_name == "MedicineIntent":
-        return get_medicine_response(intent_request)
+        response = get_medicine_response(intent_request)
+        requests.get(url, params=to_send, data=data)
+        return response
     elif intent_name == "HoneyIntent":
-        return get_honey_response(intent_request)
+        response = get_honey_response(intent_request)
+        requests.get(url, params=to_send, data=data)
+        return response
+        elif intent_name == "FeelingIntent":
+            response = get_feeling_response(intent_request)
+            requests.get(url, params=to_send, data=data)
+        return response
     elif intent_name == "AMAZON.HelpIntent":
         return get_help_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
@@ -108,13 +139,13 @@ def get_medicine_response(intent_request):
     session_attributes = {}
     card_title = "Medicine"
     speech_template = "I understand you took {}. How many ounces of honey did you take?"
-    
+
     medicine = intent_request["intent"]["slots"]["medicine"]["value"]
-    
+
     speech_output = speech_template.format(medicine)
-    
+
     reprompt_text = speech_output
-    should_end_session = True
+    should_end_session = False
     return build_response(session_attributes, build_speechlet_response(card_title, speech_output, reprompt_text, should_end_session))
 # Maybe not "should_end_session"
 
@@ -125,6 +156,17 @@ def get_honey_response(intent_request):
     speech_template = "I understand you took {} ounces of honey. How are you feeling?"
     ounces = intent_request["intent"]["slots"]["number"]["value"]
     speech_output = speech_template.format(ounces)
+    reprompt_text = speech_output
+    should_end_session = False
+    return build_response(session_attributes, build_speechlet_response(card_title, speech_output, reprompt_text, should_end_session))
+
+
+def get_feeling_response(intent_request):
+    session_attributes = {}
+    card_title = "Feelings"
+    speech_template = "I understand you feel {}."
+    feeling = intent_request["intent"]["slots"]["feeling"]["value"]
+    speech_output = speech_template.format(feeling)
     reprompt_text = speech_output
     should_end_session = True
     return build_response(session_attributes, build_speechlet_response(card_title, speech_output, reprompt_text, should_end_session))

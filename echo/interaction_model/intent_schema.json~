@@ -4,7 +4,7 @@
 	"intent": "MedicineIntent",
 	"slots": [
 	    {
-		"name": "medicine",
+		"name": "data",
 		"type": "MEDICINES"
 	    }
 	]
@@ -13,7 +13,7 @@
 	"intent": "HoneyIntent",
 	"slots": [
 	    {
-		"name":"medicine",
+		"name":"data",
 		"type":"OUNCES"
 	    }
 	]
@@ -23,7 +23,7 @@
 	"intent": "FeelingIntent",
 	"slots": [
 	    {
-		"name":"medicine",
+		"name":"data",
 		"type":"FEELINGS"
 	    }
 	]
