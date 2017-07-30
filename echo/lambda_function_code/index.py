@@ -4,7 +4,6 @@ BeeTRx
 
 import requests
 
-to_send = {"string": "HELLO!"}
 url = "https://6737f637.ngrok.io/aws-test"
 
 
@@ -82,15 +81,15 @@ def on_intent(intent_request, session):
     # Dispatch to your skill's intent handlers
     if intent_name == "MedicineIntent":
         response = get_medicine_response(intent_request)
-        requests.get(url, params=to_send, data=data)
+        requests.get(url, data=data)
         return response
     elif intent_name == "HoneyIntent":
         response = get_honey_response(intent_request)
-        requests.get(url, params=to_send, data=data)
+        requests.get(url, data=data)
         return response
     elif intent_name == "FeelingIntent":
         response = get_feeling_response(intent_request)
-        requests.get(url, params=to_send, data=data)
+        requests.get(url, data=data)
         return response
     elif intent_name == "AMAZON.HelpIntent":
         return get_help_response()
